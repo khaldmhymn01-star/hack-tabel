@@ -1,0 +1,492 @@
+
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RED CORE | Hacker Interface</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+:root {
+  --red:#ff102b;
+  --red2:#850013;
+  --bg:#030303;
+  --panel:#080607;
+  --dim:#85202d;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--bg);color:var(--red);
+  font-family:'Share Tech Mono',monospace;
+  overflow-x:hidden;
+}
+body:after{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:20;
+  background:repeating-linear-gradient(0deg,transparent 0 3px,#ff001008 4px);
+}
+header{
+  height:48px;border-bottom:1px solid var(--red2);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 16px;gap:10px;font-size:13px;
+  background:#070203;position:relative;z-index:2;
+}
+.brand{font-size:16px;font-weight:bold;text-shadow:0 0 10px red}
+.clock{white-space:nowrap}
+.layout{
+  display:grid;grid-template-columns:260px minmax(300px,1fr) 260px;
+  gap:10px;padding:10px;max-width:1600px;margin:auto;
+}
+.col{display:flex;flex-direction:column;gap:10px;min-width:0}
+.panel{
+  border:1px solid #690013;background:rgba(8,2,4,.94);
+  min-width:0;box-shadow:0 0 12px #ff00100b;
+}
+.ptitle{
+  border-bottom:1px solid #690013;padding:10px;
+  background:#140206;font-size:13px;
+  display:flex;justify-content:space-between;gap:8px;
+}
+.content{padding:12px}
+.stat{margin:10px 0;font-size:12px}
+.statrow{display:flex;justify-content:space-between;gap:5px;margin-bottom:6px}
+.track{height:6px;background:#21050a;border:1px solid #4c0915}
+.fill{height:100%;background:var(--red);box-shadow:0 0 8px red;transition:width .5s}
+.hero{
+  height:195px;position:relative;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse,#280008 0%,#090204 48%,#030303 80%);
+}
+.hero:before{
+  content:"";position:absolute;inset:0;
+  background:repeating-linear-gradient(transparent 0 4px,#ff001008 5px);
+}
+.hood{font-size:78px;filter:drop-shadow(0 0 20px red);opacity:.7}
+.herotext{position:absolute;text-align:center;right:5%;left:5%}
+.herotext h1{font-size:clamp(25px,4vw,43px);margin:8px 0;text-shadow:0 0 20px red}
+.herotext p{font-size:11px;letter-spacing:2px}
+.tag{border:1px solid #8d0017;display:inline-block;padding:6px;font-size:10px}
+.globeBox{height:300px;position:relative;overflow:hidden}
+#globe{width:100%;height:100%;display:block}
+.globeLabel{
+  position:absolute;bottom:12px;left:0;right:0;text-align:center;
+  font-size:10px;color:#ff6475;pointer-events:none;
+}
+.globeTop{
+  position:absolute;top:10px;left:10px;font-size:10px;
+  line-height:1.8;pointer-events:none;
+}
+.terminal{
+  height:265px;overflow:auto;padding:14px;
+  font-size:12px;line-height:1.9;overflow-wrap:anywhere;
+}
+.line{animation:appear .3s ease}
+.dim{color:#a43b4b}
+.white{color:#ffb1bb}
+.cursor{display:inline-block;width:8px;height:13px;background:red;animation:blink .8s infinite}
+.gridstats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.mini{text-align:center;border:1px solid #49000e;padding:12px 3px}
+.mini small{display:block;font-size:10px;color:#a84656;margin-bottom:9px}
+.mini b{font-size:16px}
+.log{font-size:11px;line-height:2.2;overflow-wrap:anywhere}
+.log div{border-bottom:1px solid #24050a}
+.map{height:160px;position:relative;overflow:hidden;background:#080204}
+#map{width:100%;height:100%}
+.buttons{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+button{
+  background:#100207;border:1px solid #750016;color:var(--red);
+  font-family:inherit;padding:13px 5px;cursor:pointer;font-size:11px;
+}
+button:hover{background:#51000c;box-shadow:0 0 12px #ff102b55}
+button:active{transform:scale(.97)}
+.footer{text-align:center;color:#85202d;font-size:10px;padding:18px}
+.alert{color:#ff6677;animation:blink 1.5s infinite}
+@keyframes blink{50%{opacity:.25}}
+@keyframes appear{from{opacity:0;transform:translateX(-5px)}to{opacity:1;transform:none}}
+@media(max-width:850px){
+ .layout{grid-template-columns:1fr}
+ .col{display:contents}
+ .layout>.col:nth-child(1){display:flex}
+ .layout>.col:nth-child(2){display:flex}
+ .layout>.col:nth-child(3){display:flex}
+ .hero{height:170px}
+ .globeBox{height:310px}
+ .terminal{height:230px}
+ .buttons{grid-template-columns:repeat(2,1fr)}
+ header{font-size:10px;padding:0 8px}
+ .brand{font-size:13px}
+}
+</style>
+</head>
+<body>
+
+<header>
+ <div class="brand">▰ RED CORE <span style="color:white">//</span> TERMINAL</div>
+ <div>● SYSTEM ONLINE</div>
+ <div class="clock" id="clock">00:00:00</div>
+</header>
+
+<div class="layout">
+
+<!-- LEFT SIDE -->
+<div class="col">
+ <section class="panel">
+  <div class="ptitle"><span>SYSTEM STATUS</span><span>01</span></div>
+  <div class="content" id="stats">
+   <div class="stat"><div class="statrow"><span>CPU USAGE</span><span id="cpu">48%</span></div><div class="track"><div class="fill" id="cpuf" style="width:48%"></div></div></div>
+   <div class="stat"><div class="statrow"><span>MEMORY</span><span id="ram">62%</span></div><div class="track"><div class="fill" id="ramf" style="width:62%"></div></div></div>
+   <div class="stat"><div class="statrow"><span>DISK</span><span id="disk">31%</span></div><div class="track"><div class="fill" id="diskf" style="width:31%"></div></div></div>
+   <div class="stat"><div class="statrow"><span>NETWORK</span><span id="net">89%</span></div><div class="track"><div class="fill" id="netf" style="width:89%"></div></div></div>
+  </div>
+ </section>
+
+ <section class="panel">
+  <div class="ptitle"><span>GLOBAL NETWORK</span><span>LIVE</span></div>
+  <div class="map"><canvas id="map"></canvas></div>
+  <div class="content log" id="nodes">
+   <div>› USA <span style="float:right">[ CONNECTED ]</span></div>
+   <div>› GERMANY <span style="float:right">[ CONNECTED ]</span></div>
+   <div>› JAPAN <span style="float:right">[ CONNECTED ]</span></div>
+   <div>› IRAQ <span style="float:right">[ CONNECTED ]</span></div>
+   <div>› FRANCE <span style="float:right">[ CONNECTED ]</span></div>
+   <div class="dim">TOTAL NODES: 05</div>
+  </div>
+ </section>
+
+ <section class="panel">
+  <div class="ptitle"><span>LIVE MONITOR</span><span>CAM-01</span></div>
+  <div class="content" style="text-align:center">
+   <div style="font-size:45px;text-shadow:0 0 15px red">◉</div>
+   <div class="dim" style="font-size:11px">SIGNAL MONITORING</div>
+   <div style="font-size:12px;margin-top:12px">SIGNAL: <span id="signal">98.2%</span></div>
+  </div>
+ </section>
+</div>
+
+<!-- CENTER -->
+<div class="col">
+ <section class="panel hero">
+  <div class="hood">◢</div>
+  <div class="herotext">
+   <div class="tag">CLASSIFIED // SIMULATION</div>
+   <h1 id="heroTitle">ACCESS GRANTED</h1>
+   <p>WELCOME TO THE DARK NETWORK</p>
+  </div>
+ </section>
+
+ <section class="panel">
+  <div class="ptitle"><span>GLOBAL EARTH // 3D</span><span class="alert">● ROTATING</span></div>
+  <div class="globeBox">
+   <canvas id="globe"></canvas>
+   <div class="globeTop">EARTH NETWORK<br>ROTATION: ACTIVE<br>MODE: HOLOGRAM</div>
+   <div class="globeLabel">GLOBAL CONNECTION SIMULATION // RED CORE</div>
+  </div>
+ </section>
+
+ <section class="panel">
+  <div class="ptitle"><span>TERMINAL // ROOT@REDCORE</span><span>− □ ×</span></div>
+  <div class="terminal" id="terminal">
+   <div class="line white">RED CORE TERMINAL v4.9.1</div>
+   <div class="line dim">--------------------------------------</div>
+   <div class="line">root@redcore:~# initialize --visual</div>
+   <div class="line">Loading cinematic interface...</div>
+   <div class="line">Rendering global hologram... <span class="white">[OK]</span></div>
+   <div class="line">Virtual environment ready.</div>
+   <div class="line dim">This is a local visual simulation.</div>
+   <div class="line">root@redcore:~# <span class="cursor"></span></div>
+  </div>
+ </section>
+
+ <section class="panel">
+  <div class="ptitle"><span>OPERATION PROGRESS</span><span id="percent">73%</span></div>
+  <div class="content">
+   <div class="statrow" style="font-size:11px"><span id="opname">INITIALIZING SYSTEM...</span><span id="nums">73 / 100</span></div>
+   <div class="track" style="height:14px"><div class="fill" id="progress" style="width:73%;height:100%"></div></div>
+   <div class="dim" style="font-size:11px;margin-top:12px" id="opstatus">› Rendering visual effects...</div>
+  </div>
+ </section>
+
+ <div class="buttons">
+  <button onclick="runOp('SYSTEM SCAN')">◈ SCAN</button>
+  <button onclick="runOp('AUTH CHECK')">◎ AUTH</button>
+  <button onclick="runOp('ENCRYPTION DEMO')">▣ ENCRYPT</button>
+  <button onclick="runOp('NETWORK SIMULATION')">⬆ UPLOAD</button>
+ </div>
+</div>
+
+<!-- RIGHT SIDE -->
+<div class="col">
+ <section class="panel">
+  <div class="ptitle"><span>SECURITY MODULES</span><span>02</span></div>
+  <div class="content log" id="security">
+   <div>Firewall <span style="float:right">ACTIVE</span></div>
+   <div>Antivirus <span style="float:right">ACTIVE</span></div>
+   <div>Encryption <span style="float:right">AES-256</span></div>
+   <div>Monitoring <span style="float:right">ONLINE</span></div>
+  </div>
+ </section>
+
+ <section class="panel">
+  <div class="ptitle"><span>DATA TRANSFER</span><span>LIVE</span></div>
+  <div class="content">
+   <div class="stat"><div class="statrow"><span>INBOUND</span><span id="inbound">12.4 MB/s</span></div><div class="track"><div class="fill" id="inf" style="width:60%"></div></div></div>
+   <div class="stat"><div class="statrow"><span>OUTBOUND</span><span id="outbound">8.7 MB/s</span></div><div class="track"><div class="fill" id="outf" style="width:40%"></div></div></div>
+   <div class="dim" style="font-size:11px;margin-top:12px">SIMULATED DATA FLOW</div>
+  </div>
+ </section>
+
+ <section class="panel">
+  <div class="ptitle"><span>ACTIVE CONNECTIONS</span><span>05</span></div>
+  <div class="content log">
+   <div>192.168.1.10 : 22</div>
+   <div>10.0.0.5 : 443</div>
+   <div>172.16.0.3 : 80</div>
+   <div>8.8.8.8 : 53</div>
+   <div>127.0.0.1 : 8080</div>
+   <div class="dim">DEMO DATA ONLY</div>
+  </div>
+ </section>
+
+ <section class="panel">
+  <div class="ptitle"><span>SYSTEM LOGS</span><span>LIVE</span></div>
+  <div class="content log" id="logs">
+   <div>[22:16:12] Interface initialized</div>
+   <div>[22:16:14] Globe rendering active</div>
+   <div>[22:16:20] Visual scan ready</div>
+   <div>[22:16:32] Simulation online</div>
+  </div>
+ </section>
+
+ <section class="panel">
+  <div class="ptitle"><span>THREAT LEVEL</span><span>!</span></div>
+  <div class="content" style="text-align:center">
+   <div class="track" style="height:14px"><div class="fill" style="width:88%"></div></div>
+   <div class="alert" style="font-size:20px;margin-top:12px">ELEVATED</div>
+   <div class="dim" style="font-size:10px;margin-top:7px">DEMO INDICATOR</div>
+  </div>
+ </section>
+</div>
+</div>
+
+<div class="footer">
+ &lt;/&gt; NO SYSTEM IS SAFE IN THE MOVIES &lt;/&gt;<br>
+ RED CORE // CINEMATIC HACKER INTERFACE<br>
+ ALL METRICS AND CONNECTIONS ARE SIMULATED
+</div>
+
+<script>
+// CLOCK
+function clock(){
+ document.getElementById('clock').textContent=new Date().toLocaleTimeString('en-GB');
+}
+clock();setInterval(clock,1000);
+
+// RANDOM DISPLAY METRICS
+function randomize(id,bar,min=10,max=98){
+ const n=Math.floor(min+Math.random()*(max-min));
+ document.getElementById(id).textContent=n+'%';
+ document.getElementById(bar).style.width=n+'%';
+}
+setInterval(()=>{
+ randomize('cpu','cpuf',15,95);
+ randomize('ram','ramf',25,90);
+ randomize('disk','diskf',15,80);
+ randomize('net','netf',20,99);
+ document.getElementById('signal').textContent=(95+Math.random()*4.9).toFixed(1)+'%';
+ document.getElementById('inbound').textContent=(5+Math.random()*20).toFixed(1)+' MB/s';
+ document.getElementById('outbound').textContent=(2+Math.random()*14).toFixed(1)+' MB/s';
+ document.getElementById('inf').style.width=(20+Math.random()*75)+'%';
+ document.getElementById('outf').style.width=(15+Math.random()*75)+'%';
+},1800);
+
+// TERMINAL ANIMATION
+const terminal=document.getElementById('terminal');
+const commands=[
+'Loading visual security modules...',
+'Updating simulated network map...',
+'Generating encrypted data stream...',
+'Checking virtual firewall status...',
+'Rendering holographic Earth...',
+'Analyzing fictional data packets...',
+'Refreshing terminal interface...',
+'Visual diagnostics completed. [OK]',
+'No external systems accessed.'
+];
+function addLine(t){
+ const d=document.createElement('div');
+ d.className='line';d.textContent='> '+t;
+ terminal.appendChild(d);
+ while(terminal.children.length>45)terminal.removeChild(terminal.firstChild);
+ terminal.scrollTop=terminal.scrollHeight;
+}
+setInterval(()=>addLine(commands[Math.floor(Math.random()*commands.length)]),2200);
+
+const logbox=document.getElementById('logs');
+setInterval(()=>{
+ const d=document.createElement('div');
+ d.textContent='['+new Date().toLocaleTimeString('en-GB')+'] '+[
+ 'Rendering frame...',
+ 'Updating visual metrics...',
+ 'Simulation running',
+ 'Globe rotation active',
+ 'Refreshing interface'
+ ][Math.floor(Math.random()*5)];
+ logbox.appendChild(d);
+ while(logbox.children.length>7)logbox.removeChild(logbox.firstChild);
+},2800);
+
+// SIMULATED OPERATIONS
+let running=false;
+function runOp(name){
+ if(running)return;
+ running=true;
+ let p=0;
+ document.getElementById('opname').textContent=name;
+ document.getElementById('opstatus').textContent='> Starting visual sequence...';
+ document.getElementById('heroTitle').textContent=name;
+ addLine('Starting '+name+'...');
+ const timer=setInterval(()=>{
+  p=Math.min(100,p+Math.floor(5+Math.random()*15));
+  document.getElementById('progress').style.width=p+'%';
+  document.getElementById('percent').textContent=p+'%';
+  document.getElementById('nums').textContent=p+' / 100';
+  if(p>=100){
+   clearInterval(timer);running=false;
+   document.getElementById('opstatus').textContent='> VISUAL SEQUENCE COMPLETE [OK]';
+   document.getElementById('heroTitle').textContent='ACCESS GRANTED';
+   addLine(name+' completed. [SIMULATION ONLY]');
+  }
+ },300);
+}
+
+// 3D-STYLE ROTATING EARTH, DRAWN LOCALLY ON CANVAS
+const globe=document.getElementById('globe');
+const gc=globe.getContext('2d');
+let angle=0;
+const cities=[
+ [40,-74],[51,0],[35,139],[33,44],[48,2],
+ [-23,-46],[28,77],[1,103],[30,31],[-33,151]
+];
+function resizeGlobe(){
+ const r=globe.getBoundingClientRect();
+ const dpr=Math.min(window.devicePixelRatio||1,2);
+ globe.width=Math.max(1,Math.floor(r.width*dpr));
+ globe.height=Math.max(1,Math.floor(r.height*dpr));
+ gc.setTransform(dpr,0,0,dpr,0,0);
+}
+function project(lat,lon,R,cx,cy){
+ const a=lat*Math.PI/180;
+ const b=lon*Math.PI/180+angle;
+ const x=Math.cos(a)*Math.sin(b);
+ const y=Math.sin(a);
+ const z=Math.cos(a)*Math.cos(b);
+ return {x:cx+R*x,y:cy-R*y,z};
+}
+function drawGlobe(){
+ const w=globe.clientWidth,h=globe.clientHeight;
+ if(!w||!h)return;
+ gc.clearRect(0,0,w,h);
+ const cx=w/2,cy=h/2+3,R=Math.min(w*.36,h*.43);
+ const grad=gc.createRadialGradient(cx-R*.25,cy-R*.3,2,cx,cy,R*1.25);
+ grad.addColorStop(0,'#29000a');
+ grad.addColorStop(.65,'#0c0205');
+ grad.addColorStop(1,'#030303');
+ gc.fillStyle=grad;gc.beginPath();gc.arc(cx,cy,R,0,Math.PI*2);gc.fill();
+
+ // Outer glow
+ gc.save();
+ gc.shadowColor='#ff102b';gc.shadowBlur=18;
+ gc.strokeStyle='#c90024';gc.lineWidth=1.2;
+ gc.beginPath();gc.arc(cx,cy,R,0,Math.PI*2);gc.stroke();
+ gc.restore();
+
+ // Latitude and longitude curves
+ gc.lineWidth=.65;
+ for(let lat=-75;lat<=75;lat+=15){
+  gc.beginPath();let active=false;
+  for(let lon=-180;lon<=180;lon+=3){
+   const p=project(lat,lon,R,cx,cy);
+   if(p.z<0){active=false;continue}
+   if(!active){gc.moveTo(p.x,p.y);active=true}else gc.lineTo(p.x,p.y);
+  }
+  gc.strokeStyle='rgba(255,25,55,.55)';gc.stroke();
+ }
+ for(let lon=0;lon<180;lon+=15){
+  gc.beginPath();let active=false;
+  for(let lat=-90;lat<=90;lat+=3){
+   const p=project(lat,lon,R,cx,cy);
+   if(p.z<0){active=false;continue}
+   if(!active){gc.moveTo(p.x,p.y);active=true}else gc.lineTo(p.x,p.y);
+  }
+  gc.strokeStyle='rgba(255,25,55,.6)';gc.stroke();
+ }
+
+ // Network nodes and arcs
+ const pts=cities.map(c=>project(c[0],c[1],R,cx,cy)).filter(p=>p.z>0);
+ pts.forEach((p,i)=>{
+  pts.slice(i+1).forEach((q,j)=>{
+   if(Math.hypot(p.x-q.x,p.y-q.y)<R*.9){
+    gc.beginPath();gc.moveTo(p.x,p.y);gc.lineTo(q.x,q.y);
+    gc.strokeStyle='rgba(255,20,48,.25)';gc.stroke();
+   }
+  });
+ });
+ pts.forEach((p,i)=>{
+  gc.beginPath();gc.arc(p.x,p.y,2.2,0,Math.PI*2);
+  gc.fillStyle='#ff334e';gc.shadowColor='red';gc.shadowBlur=8;gc.fill();gc.shadowBlur=0;
+ });
+
+ // Scanning ring
+ const scanY=cy+Math.sin(angle*2)*R*.8;
+ gc.beginPath();gc.ellipse(cx,scanY,R,Math.max(3,R*.055),0,0,Math.PI*2);
+ gc.strokeStyle='rgba(255,0,40,.24)';gc.stroke();
+
+ angle+=.009;
+ requestAnimationFrame(drawGlobe);
+}
+window.addEventListener('resize',resizeGlobe);
+resizeGlobe();drawGlobe();
+
+// Decorative map panel with moving nodes
+const mapCanvas=document.getElementById('map');
+const mc=mapCanvas.getContext('2d');
+function drawMap(){
+ const w=mapCanvas.clientWidth,h=mapCanvas.clientHeight;
+ if(!w||!h)return;
+ const dpr=Math.min(window.devicePixelRatio||1,2);
+ if(mapCanvas.width!==Math.floor(w*dpr)||mapCanvas.height!==Math.floor(h*dpr)){
+  mapCanvas.width=Math.floor(w*dpr);mapCanvas.height=Math.floor(h*dpr);
+ }
+ mc.setTransform(dpr,0,0,dpr,0,0);
+ mc.clearRect(0,0,w,h);
+ mc.strokeStyle='#2d0911';mc.lineWidth=.5;
+ for(let x=0;x<w;x+=15){mc.beginPath();mc.moveTo(x,0);mc.lineTo(x,h);mc.stroke()}
+ for(let y=0;y<h;y+=15){mc.beginPath();mc.moveTo(0,y);mc.lineTo(w,y);mc.stroke()}
+ // Stylized continent silhouettes
+ const continents=[
+  [[.08,.2],[.2,.1],[.31,.19],[.29,.34],[.21,.42],[.18,.63],[.1,.49]],
+  [[.27,.49],[.36,.48],[.4,.62],[.36,.88],[.3,.7]],
+  [[.45,.17],[.56,.12],[.66,.23],[.63,.36],[.53,.37],[.49,.52],[.44,.36]],
+  [[.51,.42],[.61,.42],[.64,.63],[.57,.82],[.51,.62]],
+  [[.68,.2],[.82,.16],[.94,.29],[.9,.45],[.77,.43],[.72,.32]]
+ ];
+ continents.forEach(poly=>{
+  mc.beginPath();
+  poly.forEach((p,i)=>i?mc.lineTo(p[0]*w,p[1]*h):mc.moveTo(p[0]*w,p[1]*h));
+  mc.closePath();mc.fillStyle='#160309';mc.fill();
+  mc.strokeStyle='#a00020';mc.stroke();
+ });
+ const points=[[.19,.28],[.29,.61],[.53,.29],[.57,.56],[.79,.31]];
+ points.forEach((p,i)=>{
+  mc.beginPath();mc.arc(p[0]*w,p[1]*h,2.5,0,Math.PI*2);
+  mc.fillStyle='#ff243e';mc.shadowColor='red';mc.shadowBlur=10;mc.fill();mc.shadowBlur=0;
+  const q=points[(i+1)%points.length];
+  mc.beginPath();mc.moveTo(p[0]*w,p[1]*h);mc.lineTo(q[0]*w,q[1]*h);
+  mc.strokeStyle='#650015';mc.stroke();
+ });
+ requestAnimationFrame(drawMap);
+}
+drawMap();
+</script>
+</body>
+</html>
